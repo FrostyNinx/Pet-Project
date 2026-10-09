@@ -1,0 +1,191 @@
+:root {
+  --bg-color: #1a1b26;
+  --surface-color: #24283b;
+  --surface-light: #2f354f;
+  --border-color: #414868;
+  --accent-color: #ff5370;
+  --accent-blue: #7aa2f7;
+  --accent-green: #9ece6a;
+  --accent-yellow: #e0af68;
+  --text-main: #c0caf5;
+  --text-muted: #7982a9;
+  --font-pixel: 'Courier New', monospace;
+  --canvas-border: #565f89;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* App Container Modes */
+#app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hidden elements */
+.hidden {
+  display: none !important;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-color);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-blue);
+}
+
+/* Buttons and Inputs */
+button {
+  font-family: inherit;
+  font-size: 13px;
+  background: var(--surface-color);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+button:hover {
+  background: var(--surface-light);
+  border-color: var(--accent-blue);
+  color: #fff;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button.btn-primary {
+  background: var(--accent-blue);
+  color: #1a1b26;
+  border-color: var(--accent-blue);
+  font-weight: 600;
+}
+
+button.btn-primary:hover {
+  background: #89b4fa;
+}
+
+button.btn-accent {
+  background: var(--accent-color);
+  color: #ffffff;
+  border-color: var(--accent-color);
+  font-weight: 600;
+}
+
+button.btn-accent:hover {
+  background: #ff6e87;
+}
+
+button.active {
+  background: var(--accent-blue);
+  color: #1a1b26;
+  border-color: var(--accent-blue);
+  font-weight: bold;
+}
+
+input[type="text"], input[type="number"], select {
+  font-family: inherit;
+  font-size: 13px;
+  background: var(--surface-color);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 10px;
+  outline: none;
+}
+
+input[type="text"]:focus, select:focus {
+  border-color: var(--accent-blue);
+}
+
+/* Modal and dialogs */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 10, 18, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Custom Global Tooltip */
+.global-tooltip {
+  position: fixed;
+  background: rgba(24, 25, 38, 0.96);
+  color: #cad3f5;
+  border: 1px solid #8aadf4;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 11px;
+  line-height: 1.4;
+  max-width: 260px;
+  pointer-events: none;
+  z-index: 10000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+.global-tooltip.hidden {
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+}
+

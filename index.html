@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Co-op Pixel Pet Studio</title>
+  <link rel="stylesheet" href="./src/styles/main.css" />
+  <link rel="stylesheet" href="./src/styles/flipnote.css" />
+  <link rel="stylesheet" href="./src/styles/pet.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- 1. DESKTOP PET OVERLAY VIEW -->
+    <div id="desktopPetView" class="desktop-pet-container hidden">
+      <!-- Top floating widget bar -->
+      <div id="desktopTopWidget" class="desktop-top-widget">
+        <div class="stat-chip" data-tooltip="Hunger Bar: Decreases over time. Feed strawberry treats to keep your pet full.">
+          <span>🍓</span>
+          <div class="stat-bar"><div id="statHungerFill" class="stat-bar-fill hunger" style="width: 85%;"></div></div>
+        </div>
+        <div class="stat-chip" data-tooltip="Happiness Bar: Increases when petted, fed, or when partner sends love nudges.">
+          <span>💖</span>
+          <div class="stat-bar"><div id="statHappyFill" class="stat-bar-fill happiness" style="width: 90%;"></div></div>
+        </div>
+        <div id="petViewRoomPill" class="connection-pill" data-tooltip="P2P Connection Status: Connect with your partner on another computer.">
+          <div id="petViewStatusDot" class="status-dot"></div>
+          <span id="petViewRoomLabel">P2P: Offline</span>
+        </div>
+        <button id="btnTopToggleLock" style="padding: 4px 10px; font-size: 11px;" data-tooltip="Gaming Lock (Ctrl+Shift+L): 100% mouse click passthrough. Mouse cursor will not appear and pet cannot be dragged.">
+          🔓 Lock
+        </button>
+        <button id="btnTopToggleWalk" style="padding: 4px 10px; font-size: 11px; color: #a6da95;" data-tooltip="Dynamic Movement (Ctrl+Shift+W): Toggle whether pet strolls along screen borders or sits still.">
+          🚶 Walk: ON
+        </button>
+        <button id="btnTopSendNote" class="btn-primary" style="padding: 4px 10px; font-size: 11px;" data-tooltip="Send Note: Send a sweet message to your partner through the pet! 💌">
+          💌 Send Note
+        </button>
+        <button id="btnOpenStudioFromPet" class="btn-primary" style="padding: 4px 10px; font-size: 11px;" data-tooltip="Pixel Pet Studio: Open the full pixel animation editor and quotes customizer.">
+          ✏️ Pixel Pet Studio
+        </button>
+        <button id="btnHideWidgetFromPet" style="padding: 2px 7px; font-size: 11px; opacity: 0.75;" title="Minimize Status Bar (Ctrl+Shift+H)" data-tooltip="Minimize Status Bar (Press Ctrl+Shift+H to show again)">
+          ─
+        </button>
+        <button id="btnClosePetToStudio" style="padding: 2px 7px; font-size: 11px; opacity: 0.85; color: #ff6b6b;" title="Exit Pet Mode" data-tooltip="Exit Desktop Pet and return to Studio">
+          ✕
+        </button>
+      </div>
+
+      <!-- Draggable Pet Character -->
+      <div id="petContainer" class="pet-character">
+        <div id="petBubble" class="pet-bubble">Hello! 🐾</div>
+        <canvas id="desktopPetCanvas" width="96" height="96"></canvas>
+        <div class="pet-actions-dock">
+          <button id="btnFeed" class="pet-action-btn feed" data-tooltip="Feed Strawberry: Restores hunger (+25) and plays eating animation.">🍓</button>
+          <button id="btnPet" class="pet-action-btn pet" data-tooltip="Pet Creature: Cuddle your pet to raise happiness (+20) with floating hearts.">💖</button>
+          <button id="btnPetActionMessage" class="pet-action-btn mail" data-tooltip="Send Note: Send a sweet message to your partner through the pet! 💌">💌</button>
+          <button id="btnNudge" class="pet-action-btn heart" data-tooltip="Love Nudge: Sends floating sparkles and affection to your partner's desktop screen!">✨</button>
+          <button id="btnSleepToggle" class="pet-action-btn" data-tooltip="Sleep / Wake: Toggle resting sleep mode.">🌙</button>
+          <button id="btnQuickStudio" class="pet-action-btn studio" data-tooltip="Pixel Pet Studio: Open the animation editor.">✏️</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. PIXEL PET STUDIO EDITOR VIEW -->
+    <div id="studioView" class="studio-container">
+      <!-- Studio Header -->
+      <header class="studio-header">
+        <div class="studio-logo">
+          <span>🐾 Pixel Pet Studio</span>
+          <span class="badge">Co-op</span>
+          <button id="appVersionBadge" class="version-badge version-pill-btn" data-tooltip="Click to view What's New & Patch Notes">v1.0.3</button>
+        </div>
+
+        <!-- Studio Main Nav Tabs: Animation Editor vs Pet Quotes vs Settings -->
+        <div class="studio-nav-tabs">
+          <button id="navTabEditor" class="studio-nav-tab active" data-tooltip="Animation Canvas: Draw and animate frames for each pet behavior.">🎨 Animation Editor</button>
+          <button id="navTabQuotes" class="studio-nav-tab" data-tooltip="Custom Quotes: Customize what your pet says when scared, jumping, eating, and being loved!">💬 Pet Quotes</button>
+          <button id="navTabSettings" class="studio-nav-tab" data-tooltip="Settings: Configure sound options, multi-monitor roaming, P2P network, and pet backups.">⚙️ Settings</button>
+        </div>
+
+        <div class="header-actions">
+          <!-- P2P Room Status Pill & Connect Trigger -->
+          <div id="studioRoomPill" class="connection-pill" data-tooltip="P2P Connection: Connect with a friend to share animations and pet status in real-time.">
+            <span id="studioStatusDot" class="status-dot"></span>
+            <span id="studioRoomLabel">Connect P2P</span>
+          </div>
+
+          <!-- Patch Notes Pop-up Button -->
+          <button id="btnOpenPatchNotes" class="connection-pill header-btn-pill" data-tooltip="Patch Notes: View recent updates and what is new">
+            📜 Notes
+          </button>
+
+          <!-- Update Status & Check Button -->
+          <div id="updateStatusPill" class="connection-pill update-pill" data-tooltip="App Updates: Click to check for new updates or see download progress.">
+            <span id="updateIcon">🚀</span>
+            <span id="updateStatusLabel">v1.0.2</span>
+          </div>
+
+          <button id="btnSwitchToPet" class="btn-primary" data-tooltip="Desktop Pet Mode: Float your live pixel pet directly over your desktop windows.">
+            🐾 Float as Desktop Pet
+          </button>
+
+          <div class="window-controls" style="display: flex; gap: 4px; margin-left: 6px;">
+            <button id="btnWinMinimize" title="Minimize" style="padding: 2px 8px; font-size: 11px;" data-tooltip="Minimize window">—</button>
+            <button id="btnWinClose" title="Close" style="padding: 2px 8px; font-size: 11px; color: #ed8796;" data-tooltip="Close application">✕</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Auto-Update Notification Banner -->
+      <div id="updateNotificationBanner" class="update-notification-banner hidden">
+        <span class="update-banner-icon">🎉</span>
+        <span id="updateBannerText" class="update-banner-text">A new update is ready!</span>
+        <div class="update-banner-actions">
+          <button id="btnApplyUpdate" class="btn-primary" style="padding: 3px 12px; font-size: 11px;">Restart & Install</button>
+          <button id="btnDismissUpdate" style="padding: 3px 8px; font-size: 11px; background: transparent; border: none; color: #a5adcb; cursor: pointer;">✕</button>
+        </div>
+      </div>
+
+      <!-- Version Mismatch Alert Banner -->
+      <div id="versionMismatchBanner" class="version-mismatch-banner hidden">
+        <div class="mismatch-body">
+          <span class="mismatch-icon">⚠️</span>
+          <span id="versionMismatchText" class="mismatch-text">Version Mismatch: You and your partner are on different versions.</span>
+        </div>
+        <button id="btnDismissMismatch" class="mismatch-dismiss-btn" title="Dismiss">✕</button>
+      </div>
+
+      <!-- VIEW A: Animation Studio Workspace -->
+      <div id="editorWorkspace" class="studio-workspace">
+        <!-- Left Tools Sidebar -->
+        <aside class="tools-sidebar">
+          <div>
+            <div class="tool-group-title">Drawing Tools</div>
+            <div class="tool-grid">
+              <button class="tool-btn active" data-tool="pen" data-tooltip="Pencil Tool: Draw individual pixels. Click and drag on the canvas.">
+                <span class="icon">✏️</span>
+                <span>Pencil</span>
+              </button>
+              <button class="tool-btn" data-tool="eraser" data-tooltip="Eraser Tool: Erase pixels to transparent. Click and drag over pixels.">
+                <span class="icon">🧹</span>
+                <span>Eraser</span>
+              </button>
+              <button class="tool-btn" data-tool="bucket" data-tooltip="Paint Bucket: Flood fill. Fills all connected pixels of the same color with your selected color.">
+                <span class="icon">🪣</span>
+                <span>Bucket</span>
+              </button>
+              <button class="tool-btn" data-tool="eyedropper" data-tooltip="Color Eyedropper: Click any pixel on the canvas to select its color.">
+                <span class="icon">💧</span>
+                <span>Picker</span>
+              </button>
+              <button class="tool-btn tool-btn-span2" data-tool="select" data-tooltip="Selection Tool (S): Drag a rectangle to select pixels. Drag to move anywhere in frame or between frames, flip, or rotate.">
+                <span class="icon">✂️</span>
+                <span>Select & Move</span>
+              </button>
+            </div>
+            <button id="btnToggleSymmetry" style="width: 100%; margin-top: 6px; font-size: 11px;" data-tooltip="Symmetry Mode: Horizontally mirrors every pixel you draw to create symmetrical pet designs easily.">
+              🪞 Symmetry Mode: OFF
+            </button>
+            <div class="tool-transform-row" style="display: flex; gap: 4px; margin-top: 6px;">
+              <button id="btnSideFlipH" class="canvas-action-btn" style="flex: 1; padding: 4px; font-size: 10px;" data-tooltip="Flip Horizontal: Flips selection (or whole frame) left-to-right.">↔️ Flip H</button>
+              <button id="btnSideFlipV" class="canvas-action-btn" style="flex: 1; padding: 4px; font-size: 10px;" data-tooltip="Flip Vertical: Flips selection (or whole frame) top-to-bottom.">↕️ Flip V</button>
+              <button id="btnSideRotateCW" class="canvas-action-btn" style="flex: 1; padding: 4px; font-size: 10px;" data-tooltip="Rotate 90°: Rotates selection (or whole frame) 90° clockwise.">🔄 90°</button>
+            </div>
+          </div>
+
+          <!-- Onion Skinning Controller -->
+          <div class="onion-box">
+            <div class="onion-header">
+              <div class="onion-title" data-tooltip="Onion Skinning: Displays a ghost layer of the previous frame (in red) and next frame (in blue) so you can animate smooth motion.">
+                <span>🧅 Onion Skin</span>
+              </div>
+              <label class="switch" data-tooltip="Toggle Onion Skin: Turn previous/next frame ghost layers on or off.">
+                <input type="checkbox" id="onionSkinToggle" checked />
+                <span class="slider-switch"></span>
+              </label>
+            </div>
+            <select id="onionSkinMode" class="onion-mode-select" data-tooltip="Ghosting Style: Choose between Retro Red/Blue tints or natural semi-transparent colors.">
+              <option value="tint">Retro Red/Blue Tint</option>
+              <option value="natural">Natural Transparency</option>
+            </select>
+            <div class="onion-transparency-row" style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px; font-size: 11px;">
+              <span data-tooltip="Ghost Drawing Layer: Makes your current drawing 45% transparent so you can clearly see the bottom onion-skin layer underneath.">👻 Ghost Active Layer</span>
+              <label class="switch" data-tooltip="Toggle Active Layer Transparency">
+                <input type="checkbox" id="onionGhostToggle" />
+                <span class="slider-switch"></span>
+              </label>
+            </div>
+            <div class="onion-legend">
+              <span class="legend-chip prev"></span>
+              <span>Prev Frame</span>
+              <span class="legend-chip next" style="margin-left: 8px;"></span>
+              <span>Next Frame</span>
+            </div>
+          </div>
+
+          <!-- Color Palettes -->
+          <div class="palette-container">
+            <div class="tool-group-title" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Palette</span>
+              <select id="paletteSelector" style="font-size: 10px; padding: 2px 4px;" data-tooltip="Palette Preset: Switch between Advanced Spectrum, Vibrant 32, Retro, Pico-8, Cozy Pet, or Pastel.">
+                <option value="advanced" selected>Advanced (Spectrum Rows)</option>
+                <option value="vibrant32">Vibrant (32 Colors)</option>
+                <option value="retro">Retro</option>
+                <option value="pico8">Pico-8</option>
+                <option value="cozyPet">Cozy Pet</option>
+                <option value="pastel">Pastel Cute</option>
+              </select>
+            </div>
+            <div id="swatchesContainer" class="palette-swatches"></div>
+
+            <!-- 5 Most Recent Colors Used -->
+            <div class="recent-colors-section">
+              <div class="recent-colors-header">
+                <span>Recent Colors</span>
+                <span style="font-size: 9px; opacity: 0.65;">(Last 5)</span>
+              </div>
+              <div id="recentColorsContainer" class="recent-swatches"></div>
+            </div>
+
+            <div class="color-picker-row">
+              <div id="currentColorBox" class="current-color-preview" style="background: #000000;" data-tooltip="Current Selected Color"></div>
+              <input type="color" id="customColorInput" value="#000000" data-tooltip="Custom Color Picker: Choose any custom color from the color wheel." />
+            </div>
+          </div>
+        </aside>
+
+        <!-- Center Canvas Stage -->
+        <main class="canvas-stage">
+          <!-- Animation State / Clip Selector Strip (Centered Top) -->
+          <div class="clip-selector-strip">
+            <div id="stateTabsContainer" class="state-tabs">
+              <button class="clip-tab active" data-clip="idle" data-tooltip="Idle Clip: Animations played when the pet is resting or standing still.">Idle</button>
+              <button class="clip-tab" data-clip="walk" data-tooltip="Walk Clip: Animations played when the pet walks along the screen border.">Walk</button>
+              <button class="clip-tab" data-clip="happy" data-tooltip="Happy Clip: Animations played when the pet is petted or cheered.">Happy</button>
+              <button class="clip-tab" data-clip="eat" data-tooltip="Eat Clip: Animations played when the pet eats a strawberry treat.">Eat</button>
+              <button class="clip-tab" data-clip="sleep" data-tooltip="Sleep Clip: Animations played when the pet curls up to sleep.">Sleep</button>
+            </div>
+          </div>
+
+          <!-- Floating Selection Action Toolbar -->
+          <div id="selectionToolbar" class="selection-toolbar hidden">
+            <span class="sel-label">✂️ Selection:</span>
+            <button id="btnSelRotateCW" class="sel-tool-btn" data-tooltip="Rotate Selection 90° Clockwise">🔄 90°</button>
+            <button id="btnSelRotateCCW" class="sel-tool-btn" data-tooltip="Rotate Selection 90° Counter-Clockwise">🔃 -90°</button>
+            <button id="btnSelFlipH" class="sel-tool-btn" data-tooltip="Flip Selection Horizontal">↔️ Flip H</button>
+            <button id="btnSelFlipV" class="sel-tool-btn" data-tooltip="Flip Vertical">↕️ Flip V</button>
+            <button id="btnSelCopy" class="sel-tool-btn" data-tooltip="Copy Selection (Ctrl+C)">📋 Copy</button>
+            <button id="btnSelDelete" class="sel-tool-btn btn-danger-subtle" data-tooltip="Delete Selected Pixels (Del)">🗑️ Del</button>
+            <button id="btnSelCommit" class="sel-tool-btn btn-primary-subtle" data-tooltip="Apply & Drop Pixels (Enter / Esc)">✔️ Apply</button>
+          </div>
+
+          <!-- Canvas Controls Bar (Clean 480px width above canvas) -->
+          <div class="canvas-controls-bar">
+            <div class="canvas-controls-left">
+              <button id="btnUndo" class="canvas-action-btn" data-tooltip="Undo (Ctrl+Z): Revert your last drawing action.">↩️ Undo</button>
+              <button id="btnRedo" class="canvas-action-btn" data-tooltip="Redo (Ctrl+Y): Redo your reverted drawing action.">↪️ Redo</button>
+              <button id="btnToggleGhostLayer" class="canvas-action-btn" data-tooltip="Ghost Drawing: Make your drawing 45% transparent so you can see the bottom onion-skin layer underneath.">👻 Ghost: OFF</button>
+              <button id="btnCopyAnimation" class="canvas-action-btn btn-highlight" data-tooltip="Copy frames or animation to other clips">Copy to...</button>
+            </div>
+            <div class="canvas-controls-right">
+              <span class="canvas-info-badge">24 × 24</span>
+              <button id="btnToggleGrid" class="canvas-action-btn" data-tooltip="Toggle Pixel Grid">Grid: ON</button>
+              <button id="btnToggleGridOnTop" class="canvas-action-btn" data-tooltip="Toggle Grid Over Paint: Print grid lines on top of your paint so pixel borders stay visible.">Grid on Top: OFF</button>
+              <button id="btnClearFrame" class="canvas-action-btn btn-danger" data-tooltip="Clear Frame: Wipes all pixels on current frame.">Clear Frame</button>
+            </div>
+          </div>
+
+          <div class="canvas-wrapper" style="width: 480px; height: 480px;">
+            <!-- Onion skin layers -->
+            <canvas id="onionCanvasPrev" width="480" height="480"></canvas>
+            <canvas id="onionCanvasNext" width="480" height="480"></canvas>
+            <!-- Main drawing layer -->
+            <canvas id="mainCanvas" width="480" height="480"></canvas>
+            <!-- Overlay grid -->
+            <canvas id="gridCanvas" width="480" height="480"></canvas>
+            <!-- Interactive Selection & Marching Ants layer -->
+            <canvas id="selectionCanvas" width="480" height="480"></canvas>
+            <!-- Real-time remote partner cursor -->
+            <canvas id="remoteCursorCanvas" width="480" height="480"></canvas>
+          </div>
+        </main>
+
+        <!-- Right Pet Preview Panel -->
+        <aside class="preview-panel">
+          <div class="tool-group-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Animation Preview</span>
+            <button id="btnOpenFullscreenPreview" class="btn-fs-pill" data-tooltip="Fullscreen Preview: Open an enlarged cinema view with playback and clip controls.">⛶ Fullscreen</button>
+          </div>
+          <div class="pet-preview-box" data-tooltip="Live Loop Preview: Shows the animated pet playing the current clip at selected speed.">
+            <canvas id="previewPetCanvas" width="160" height="160"></canvas>
+          </div>
+
+          <div class="preview-fps-row" data-tooltip="Playback Speed: Adjust how fast the animation frames play (1 to 12 frames per second).">
+            <span>Speed: <strong id="fpsLabel">4 FPS</strong></span>
+            <input type="range" id="fpsRange" min="1" max="12" value="4" />
+          </div>
+
+          <!-- Partner Connection Info Card -->
+          <div class="partner-card">
+            <div class="partner-card-header">Co-op Partner</div>
+            <div class="partner-status">
+              <div id="panelPartnerDot" class="status-dot"></div>
+              <span id="panelPartnerText">Solo (Not connected)</span>
+            </div>
+            <div id="panelPartnerRoomInfo" style="font-size: 10px; color: #a5adcb; margin-top: 4px;">
+              Share room code to draw together live!
+            </div>
+            <button id="btnStudioSendNote" class="btn-primary" style="width: 100%; margin-top: 8px; font-size: 11px; padding: 4px 8px;" data-tooltip="Send Note: Send a sweet message to your partner through the pet! 💌">
+              💌 Send Note via Pet
+            </button>
+            <button id="btnSidebarDisconnect" class="btn-danger hidden" style="width: 100%; margin-top: 6px; font-size: 11px; padding: 4px 8px;" data-tooltip="Disconnect Session: Safely leave the current P2P session.">
+              🔌 Disconnect Session
+            </button>
+          </div>
+
+          <!-- Pet Behavior Options -->
+          <div class="partner-card" style="margin-top: 4px;">
+            <div class="partner-card-header">Desktop & Gaming Controls</div>
+            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; margin-top: 4px;" data-tooltip="Autonomous Walking: When ON, the pet occasionally walks calmly along the screen borders. When OFF, it stays still so it won't distract you during gaming or movies. (Hotkey: Ctrl+Shift+W)">
+              <span>Allow Border Walks:</span>
+              <input type="checkbox" id="allowWalkingToggle" checked />
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; margin-top: 6px;" data-tooltip="Gaming Lock Mode: 100% click passthrough! Prevents mouse from dragging pet or cursor from appearing during games. (Hotkey: Ctrl+Shift+L)">
+              <span>Gaming Lock (Passthrough):</span>
+              <input type="checkbox" id="lockForGamingToggle" />
+            </div>
+            <div style="margin-top: 8px; padding-top: 6px; border-top: 1px solid #363a4f; font-size: 10px; color: #a5adcb; line-height: 1.4;">
+              <div>⌨️ <strong style="color: #cad3f5;">Ctrl+Shift+L</strong>: Gaming Lock</div>
+              <div>⌨️ <strong style="color: #cad3f5;">Ctrl+Shift+W</strong>: Toggle Walking</div>
+              <div>⌨️ <strong style="color: #cad3f5;">Ctrl+Shift+H</strong>: Toggle Status Bar</div>
+            </div>
+          </div>
+
+          <!-- Hidden File Input for Pet Import (Triggered from Settings) -->
+          <input type="file" id="importFileInput" accept=".json" style="display: none;" />
+        </aside>
+      </div>
+
+      <!-- VIEW B: Custom Quotes & Personality Manager Workspace -->
+      <div id="quotesWorkspace" class="quotes-workspace hidden">
+        <aside class="quotes-sidebar">
+          <div class="tool-group-title">Speech Categories</div>
+          <button class="quote-category-btn active" data-category="scared">
+            <span>🏃</span><span>Scared of Center</span>
+          </button>
+          <button class="quote-category-btn" data-category="safe">
+            <span>🛡️</span><span>Safe on Border</span>
+          </button>
+          <button class="quote-category-btn" data-category="jump">
+            <span>🦘</span><span>Ledge Jump</span>
+          </button>
+          <button class="quote-category-btn" data-category="feed">
+            <span>🍓</span><span>Eating Treats</span>
+          </button>
+          <button class="quote-category-btn" data-category="pet">
+            <span>💖</span><span>Being Petted</span>
+          </button>
+          <button class="quote-category-btn" data-category="nudge">
+            <span>✨</span><span>Love Nudges</span>
+          </button>
+          <button class="quote-category-btn" data-category="sleep">
+            <span>🌙</span><span>Sleep Time</span>
+          </button>
+          <button class="quote-category-btn" data-category="wake">
+            <span>☀️</span><span>Waking Up</span>
+          </button>
+        </aside>
+
+        <main class="quotes-content">
+          <div class="quotes-header-box">
+            <div class="quotes-header-title">
+              <span id="quoteCatIcon">🏃</span>
+              <span id="quoteCatTitle">Scared of Center Quotes</span>
+            </div>
+            <p id="quoteCatDesc" class="quotes-header-desc">
+              Phrases spoken when the pet is dropped in the middle of the screen and sprints for safety.
+            </p>
+          </div>
+
+          <div id="quotesListContainer" class="quotes-list">
+            <!-- Quotes dynamically populated here -->
+          </div>
+
+          <div class="add-quote-row">
+            <input type="text" id="newQuoteInput" class="add-quote-input" placeholder="Type a new quote or expression for this moment..." />
+            <button id="btnAddQuote" class="btn-primary" data-tooltip="Add Quote: Add this new phrase to your pet's vocabulary.">+ Add Quote</button>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button id="btnResetQuotes" style="font-size: 11px; color: #eed49f;" data-tooltip="Reset Quotes: Restore this category's default phrases.">🔄 Reset Category Defaults</button>
+          </div>
+        </main>
+
+        <!-- Right Live Quote Preview Panel -->
+        <aside class="quotes-preview-panel">
+          <div class="tool-group-title">Live Speech Preview</div>
+          <div class="quotes-stage-box">
+            <div id="testQuoteBubble" class="quotes-test-bubble">Hello! 🐾</div>
+            <div class="quotes-pet-preview-wrap">
+              <canvas id="quotesPetPreviewCanvas" width="96" height="96"></canvas>
+            </div>
+          </div>
+          <button id="btnTestQuote" class="btn-primary" style="width: 100%; padding: 8px 12px; font-size: 12px;" data-tooltip="Test Bubble: Display a random quote from this category in the preview bubble.">
+            💬 Test Random Quote
+          </button>
+          <p style="font-size: 11px; color: #a5adcb; text-align: center; margin-top: 6px; line-height: 1.4;">
+            💡 <em>Click any quote card on the left or test above to preview speech!</em>
+          </p>
+        </aside>
+      </div>
+
+      <!-- VIEW C: Settings Workspace -->
+      <div id="settingsWorkspace" class="settings-workspace hidden">
+        <div class="settings-container">
+          <div class="settings-header">
+            <h2>⚙️ Studio & Pet Settings</h2>
+            <p>Customize your sound effects, multi-monitor roaming, P2P network connection, and pet backups.</p>
+          </div>
+
+          <div class="settings-grid">
+            <!-- 1. Audio & Sound FX Section -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <span class="settings-card-icon">🔊</span>
+                <div>
+                  <h3>Audio & Sound Effects</h3>
+                  <p>Configure volume and sound effects for drawing tools and interface buttons.</p>
+                </div>
+              </div>
+              <div class="settings-card-body">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">Master Sound</span>
+                    <span class="setting-desc">Enable or mute all sounds across Pixel Pet Studio</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="settingSoundToggle" checked />
+                    <span class="slider-switch"></span>
+                  </label>
+                </div>
+
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">Volume</span>
+                    <span class="setting-desc" id="settingVolumeLabel">70%</span>
+                  </div>
+                  <input type="range" id="settingVolumeRange" min="0" max="100" value="70" class="setting-slider" />
+                </div>
+
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">Drawing Tool Sounds</span>
+                    <span class="setting-desc">Audio feedback when selecting Pencil, Eraser, Bucket, and Picker</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="settingToolSoundsToggle" checked />
+                    <span class="slider-switch"></span>
+                  </label>
+                </div>
+
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">Studio Button Click Sounds</span>
+                    <span class="setting-desc">Audio feedback on buttons inside Studio (never plays on desktop pet)</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="settingButtonSoundsToggle" checked />
+                    <span class="slider-switch"></span>
+                  </label>
+                </div>
+
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">Partner Notifications</span>
+                    <span class="setting-desc">Play chime when receiving notes or love nudges from partner</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="settingNotifySoundsToggle" checked />
+                    <span class="slider-switch"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Multi-Monitor Roaming -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <span class="settings-card-icon">🖥️</span>
+                <div>
+                  <h3>Multi-Monitor Roaming</h3>
+                  <p>Allow your pet to stroll and jump across all connected computer displays.</p>
+                </div>
+              </div>
+              <div class="settings-card-body">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">Enable Multi-Monitor Roaming</span>
+                    <span class="setting-desc">When enabled, the pet walks across monitors and screen edges seamlessly</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="settingMultiMonitorToggle" />
+                    <span class="slider-switch"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Co-op Peer-to-Peer Networking -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <span class="settings-card-icon">🔗</span>
+                <div>
+                  <h3>Co-op P2P Connection</h3>
+                  <p>Connect with a partner across computers to animate and care for your pet live.</p>
+                </div>
+              </div>
+              <div class="settings-card-body">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">Connection Status</span>
+                    <span class="setting-desc" id="settingP2pStatusDesc">Offline (Not connected)</span>
+                  </div>
+                  <div id="settingP2pStatusBadge" class="p2p-status-badge">Offline</div>
+                </div>
+
+                <div style="display: flex; gap: 8px; margin-top: 10px;">
+                  <button id="btnSettingsOpenP2P" class="btn-primary" style="flex: 1; padding: 8px;">
+                    🔗 Open Connection Dialog
+                  </button>
+                  <button id="btnSettingsDisconnect" class="btn-danger hidden" style="flex: 1; padding: 8px;">
+                    🔌 Disconnect Session
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Pet Data & Backups -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <span class="settings-card-icon">💾</span>
+                <div>
+                  <h3>Pet Data & Backups</h3>
+                  <p>Export your pet animations and quotes to a JSON file or restore from a backup.</p>
+                </div>
+              </div>
+              <div class="settings-card-body">
+                <div style="display: flex; gap: 10px; margin-top: 4px;">
+                  <button id="btnSettingsExportPet" style="flex: 1; padding: 8px;">
+                    💾 Export Pet JSON
+                  </button>
+                  <button id="btnSettingsImportPet" style="flex: 1; padding: 8px;">
+                    📂 Import Pet JSON
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Timeline Strip (visible on Editor view) -->
+      <footer id="editorTimeline" class="studio-timeline">
+        <div class="timeline-toolbar">
+          <div class="timeline-buttons-left">
+            <button id="btnPlayPreview" class="btn-primary" style="padding: 4px 10px;" data-tooltip="Play Preview: Toggle looping preview of the current animation clip.">▶ Play Preview</button>
+            <button id="btnDuplicateFrame" style="padding: 4px 10px;" data-tooltip="Duplicate Frame: Copy the active frame into the next slot. Perfect for making small movement tweaks!">📋 Duplicate Frame</button>
+            <button id="btnDeleteFrame" style="padding: 4px 10px; color: #ed8796;" data-tooltip="Delete Frame: Remove the active frame from this animation clip.">🗑️ Delete Frame</button>
+          </div>
+          <div class="timeline-info">
+            Animation Frames (<span id="frameCountLabel">1</span>)
+          </div>
+        </div>
+        <div id="timelineFramesStrip" class="timeline-frames-strip">
+          <!-- Dynamic Frame Cards inserted here -->
+        </div>
+      </footer>
+    </div>
+
+    <!-- 3. P2P ROOM CONNECTION MODAL -->
+    <div id="p2pModal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <div class="modal-title">
+          <span>🔗 Connect with Partner</span>
+        </div>
+        <p style="font-size: 12px; color: #a5adcb; margin-bottom: 16px;">
+          Connect two computers directly via Peer-to-Peer WebRTC to draw and care for your pet together in real-time.
+        </p>
+
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <button id="modalTabHost" class="btn-primary" style="flex: 1;" data-tooltip="Host Room: Generate a 6-digit room code to share with your partner.">Host Room</button>
+          <button id="modalTabJoin" style="flex: 1;" data-tooltip="Join Room: Enter your partner's room code to connect to their session.">Join Room</button>
+        </div>
+
+        <!-- Host Section -->
+        <div id="modalHostSection">
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 11px; color: #a5adcb; display: block; margin-bottom: 4px;">Your Room Code:</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="hostCodeInput" readonly value="Click 'Start Host' below" style="font-weight: bold; letter-spacing: 1px; font-size: 15px; flex: 1; text-align: center;" />
+              <button id="btnCopyHostCode" data-tooltip="Copy Code: Copy the room code to your clipboard.">📋 Copy</button>
+            </div>
+          </div>
+          <p id="hostStatusNote" style="font-size: 11px; color: #eed49f; margin-bottom: 16px;">
+            Click the button below to generate a room code and invite your partner.
+          </p>
+          <button id="btnStartHost" class="btn-primary" style="width: 100%; padding: 8px;" data-tooltip="Generate Room Code: Starts hosting a WebRTC room.">
+            Generate Room Code & Host
+          </button>
+        </div>
+
+        <!-- Join Section -->
+        <div id="modalJoinSection" class="hidden">
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 11px; color: #a5adcb; display: block; margin-bottom: 4px;">Enter Partner's Room Code:</label>
+            <input type="text" id="joinCodeInput" placeholder="e.g. PET-7492" style="width: 100%; font-weight: bold; letter-spacing: 1px; font-size: 15px; text-align: center;" />
+          </div>
+          <button id="btnConnectJoin" class="btn-primary" style="width: 100%; padding: 8px;" data-tooltip="Connect to Room: Joins your partner's room code session.">
+            Connect to Room
+          </button>
+        </div>
+
+        <div id="modalDisconnectRow" class="hidden" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #363a4f;">
+          <button id="btnModalDisconnect" class="btn-danger" style="width: 100%; padding: 8px;">
+            🔌 Disconnect Current Session
+          </button>
+        </div>
+
+        <div style="margin-top: 16px; display: flex; justify-content: flex-end;">
+          <button id="btnCloseModal">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. PET MESSAGE MODAL (SEND NOTE TO PARTNER) -->
+    <div id="petMessageModal" class="modal-overlay hidden">
+      <div class="modal-content pet-message-modal-box">
+        <div class="modal-title">
+          <span>💌 Send a Note via Pet</span>
+        </div>
+        <p style="font-size: 12px; color: #a5adcb; margin-bottom: 12px;">
+          Type a sweet note or reminder. Your pet will deliver it directly to your partner's desktop!
+        </p>
+
+        <!-- Quick Note Presets -->
+        <div class="quick-presets-label">Quick Notes:</div>
+        <div class="quick-notes-presets">
+          <button class="quick-note-pill" data-text="Thinking of you! 💖">💖 Thinking of you!</button>
+          <button class="quick-note-pill" data-text="Did you drink water today? 💧">💧 Drink water!</button>
+          <button class="quick-note-pill" data-text="You're doing great! ✨">✨ You got this!</button>
+          <button class="quick-note-pill" data-text="Let's take a break soon 🍵">🍵 Take a break!</button>
+          <button class="quick-note-pill" data-text="Good morning! ☀️">☀️ Good morning!</button>
+          <button class="quick-note-pill" data-text="Sending hugs! 🐾">🐾 Sending hugs!</button>
+        </div>
+
+        <div style="margin-top: 10px; position: relative;">
+          <textarea id="petMessageInput" class="pet-message-textarea" maxlength="120" placeholder="Type your note here (e.g. Hope your day is going well! <3)..." rows="3"></textarea>
+          <div id="petMessageCharCount" class="char-count">0 / 120</div>
+        </div>
+
+        <div style="margin-top: 14px; display: flex; justify-content: flex-end; gap: 8px;">
+          <button id="btnClosePetMessage" style="padding: 6px 14px;">Cancel</button>
+          <button id="btnSendPetMessage" class="btn-primary" style="padding: 6px 16px;">Send Note 💌</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. INCOMING PARTNER MESSAGE TOAST (ONLY FOR LOVE NOTES) -->
+    <div id="petMessageToast" class="pet-message-toast hidden">
+      <span class="toast-icon">💌</span>
+      <div class="toast-body">
+        <div class="toast-title">Note from Partner:</div>
+        <div id="toastMessageText" class="toast-text">"Thinking of you!"</div>
+      </div>
+      <button id="btnToastReply" class="toast-reply-btn">Reply 💌</button>
+      <button id="btnToastClose" style="padding: 2px 6px; font-size: 10px; opacity: 0.6; border: none; background: transparent; color: #fff; cursor: pointer;">✕</button>
+    </div>
+
+    <!-- 5B. GENERAL SYSTEM NOTIFICATION TOAST (CLEAN, SEPARATE FROM LOVE NOTE) -->
+    <div id="systemNotificationToast" class="system-notification-toast hidden">
+      <span id="systemToastIcon" class="sys-toast-icon">ℹ️</span>
+      <div class="sys-toast-body">
+        <div id="systemToastTitle" class="sys-toast-title">Notice</div>
+        <div id="systemToastText" class="sys-toast-text">Action completed</div>
+      </div>
+      <button id="btnSystemToastClose" class="sys-toast-close" title="Dismiss">✕</button>
+    </div>
+
+    <!-- 6. COPY FRAMES / ANIMATION MODAL (NO EMOJIS, CLEAN & POWERFUL) -->
+    <div id="copyAnimationModal" class="modal-overlay hidden">
+      <div class="modal-content" style="max-width: 480px;">
+        <div class="modal-title" style="display: flex; align-items: center; justify-content: space-between;">
+          <span>Copy Frames / Animation</span>
+          <button id="btnCloseCopyModalHeader" style="background: transparent; border: none; color: #a5adcb; cursor: pointer; font-size: 14px; padding: 2px 6px;">✕</button>
+        </div>
+        <p style="font-size: 12px; color: #a5adcb; margin-bottom: 12px; line-height: 1.4;">
+          Duplicate artwork from the active animation clip (<strong id="copySourceClipName" style="color: #f5a97f;">Idle</strong>) into other animation clips.
+        </p>
+
+        <!-- 1. Frame Selection -->
+        <div class="copy-section-box">
+          <div class="copy-section-title">1. What to Copy</div>
+          <div class="copy-radio-group">
+            <label class="copy-radio-option">
+              <input type="radio" name="copyScope" value="current" id="copyScopeCurrent" checked />
+              <div class="copy-radio-text">
+                <span class="copy-radio-title">Current Frame</span>
+                <span class="copy-radio-subtitle" id="copyCurrentFrameLabel">Frame 1</span>
+              </div>
+            </label>
+
+            <label class="copy-radio-option">
+              <input type="radio" name="copyScope" value="specific" id="copyScopeSpecific" />
+              <div class="copy-radio-text" style="flex: 1; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <span class="copy-radio-title">Specific Frame</span>
+                  <span class="copy-radio-subtitle">Choose by number</span>
+                </div>
+                <select id="copySpecificFrameSelect" class="copy-frame-select">
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+            </label>
+
+            <label class="copy-radio-option">
+              <input type="radio" name="copyScope" value="all" id="copyScopeAll" />
+              <div class="copy-radio-text">
+                <span class="copy-radio-title">All Frames</span>
+                <span class="copy-radio-subtitle" id="copyAllFramesCountLabel">Entire animation clip</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. Destination Frame Mode -->
+        <div class="copy-section-box" style="margin-top: 10px;">
+          <div class="copy-section-title">2. Destination Mode</div>
+          <label class="copy-checkbox-row">
+            <input type="checkbox" id="copyReplaceToggle" />
+            <span style="font-size: 12px; color: #cad3f5;">Replace existing frames in destination</span>
+          </label>
+          <div class="copy-hint">When unchecked, copied frames are appended after the destination's existing frames.</div>
+        </div>
+
+        <!-- 3. Destination Target -->
+        <div class="copy-section-box" style="margin-top: 10px;">
+          <div class="copy-section-title">3. Destination Animation</div>
+          
+          <button id="btnCopyApplyToAll" class="btn-copy-all-dest">
+            Copy to All Other Animations
+          </button>
+
+          <div style="font-size: 11px; color: #a5adcb; margin: 8px 0 6px 0;">Or copy to a specific animation:</div>
+          <div class="copy-target-grid">
+            <button class="btn-copy-target" data-target="idle">Idle</button>
+            <button class="btn-copy-target" data-target="walk">Walk</button>
+            <button class="btn-copy-target" data-target="happy">Happy</button>
+            <button class="btn-copy-target" data-target="eat">Eat</button>
+            <button class="btn-copy-target" data-target="sleep">Sleep</button>
+          </div>
+        </div>
+
+        <div style="margin-top: 14px; display: flex; justify-content: flex-end;">
+          <button id="btnCloseCopyModal" style="padding: 6px 16px;">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. WHAT'S NEW / PATCH NOTES MODAL -->
+    <div id="patchNotesModal" class="modal-overlay hidden">
+      <div class="modal-content patch-notes-modal-box">
+        <div class="modal-title" style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span>What's New</span>
+            <span id="patchNotesVersionTag" class="patch-version-tag">v1.0.3</span>
+          </div>
+          <button id="btnClosePatchNotesHeader" style="background: transparent; border: none; color: #a5adcb; cursor: pointer; font-size: 14px; padding: 2px 6px;">✕</button>
+        </div>
+        <p style="font-size: 12px; color: #a5adcb; margin-bottom: 14px; line-height: 1.4;">
+          Here are the latest features and improvements in Pixel Pet Studio:
+        </p>
+
+        <div class="patch-notes-list">
+          <div class="patch-item">
+            <div class="patch-item-icon">✂️</div>
+            <div class="patch-item-body">
+              <div class="patch-item-title">Drag & Highlight Selection Tool</div>
+              <div class="patch-item-desc">Select pixel clusters with animated marching-ants outline. Drag to move anywhere in frame or carry across timeline frames to duplicate designs. Includes Rotate 90° CW/CCW and Flip H/V tools.</div>
+            </div>
+          </div>
+
+          <div class="patch-item">
+            <div class="patch-item-icon">👻</div>
+            <div class="patch-item-body">
+              <div class="patch-item-title">Ghost Active Drawing Layer</div>
+              <div class="patch-item-desc">Toggle your active drawing layer to 45% transparency so you can see right through your ink to the underlying onion skin ghost layers while animating.</div>
+            </div>
+          </div>
+
+          <div class="patch-item">
+            <div class="patch-item-icon">🏁</div>
+            <div class="patch-item-body">
+              <div class="patch-item-title">Grid Printed Over Paint Toggle</div>
+              <div class="patch-item-desc">Choose whether the pixel grid renders beneath your paint or crisp and bright on top of painted pixels so cell boundaries stay distinct even over solid colors.</div>
+            </div>
+          </div>
+
+          <div class="patch-item">
+            <div class="patch-item-icon">🎯</div>
+            <div class="patch-item-body">
+              <div class="patch-item-title">P2P Cursor Isolation by Page & Frame</div>
+              <div class="patch-item-desc">Partner cursors are strictly scoped to the exact clip and frame index you are editing. No more ghost partner cursors across different tabs or frames!</div>
+            </div>
+          </div>
+
+          <div class="patch-item">
+            <div class="patch-item-icon">⚠️</div>
+            <div class="patch-item-body">
+              <div class="patch-item-title">Strict Version Mismatch Protection</div>
+              <div class="patch-item-desc">P2P handshakes enforce strict version matching, blocking older mismatched clients from connecting to prevent animation data corruption.</div>
+            </div>
+          </div>
+
+          <div class="patch-item">
+            <div class="patch-item-icon">⛶</div>
+            <div class="patch-item-body">
+              <div class="patch-item-title">Fullscreen Animation Preview</div>
+              <div class="patch-item-desc">Enlarged preview box with a 1-click Fullscreen cinema mode and custom FPS playback speed slider to preview pet animations smoothly.</div>
+            </div>
+          </div>
+
+          <div class="patch-item">
+            <div class="patch-item-icon">🔊</div>
+            <div class="patch-item-body">
+              <div class="patch-item-title">Studio Audio & Dedicated Settings Tab</div>
+              <div class="patch-item-desc">Tactile drawing and button sounds with customizable volume sliders, tool mute toggles, and multi-monitor roaming controls housed in the new Settings tab.</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; display: flex; justify-content: flex-end;">
+          <button id="btnClosePatchNotes" class="btn-primary" style="padding: 6px 18px; font-size: 12px;">Got it!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. FULLSCREEN ANIMATION PREVIEW MODAL -->
+    <div id="fullscreenPreviewModal" class="modal-overlay hidden">
+      <div class="modal-content fs-modal-box">
+        <div class="modal-title" style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span>🎬 Animation Fullscreen Preview</span>
+            <span id="fsClipNameBadge" class="patch-version-tag">Idle</span>
+          </div>
+          <button id="btnCloseFsModal" style="background: transparent; border: none; color: #a5adcb; cursor: pointer; font-size: 16px; padding: 2px 6px;">✕</button>
+        </div>
+
+        <div class="fs-stage-container">
+          <canvas id="fullscreenPetCanvas" width="384" height="384"></canvas>
+        </div>
+
+        <div class="fs-controls-strip">
+          <div class="fs-clip-selector">
+            <button class="fs-clip-tab active" data-clip="idle">Idle</button>
+            <button class="fs-clip-tab" data-clip="walk">Walk</button>
+            <button class="fs-clip-tab" data-clip="happy">Happy</button>
+            <button class="fs-clip-tab" data-clip="eat">Eat</button>
+            <button class="fs-clip-tab" data-clip="sleep">Sleep</button>
+          </div>
+
+          <div class="fs-playback-row">
+            <button id="btnFsPlayToggle" class="btn-primary" style="padding: 4px 14px; font-size: 11px;">⏸ Pause</button>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 11px;">Speed: <strong id="fsSpeedLabel" style="color: #f5a97f;">4 FPS</strong></span>
+              <input type="range" id="fsSpeedRange" min="1" max="12" value="4" style="width: 100px;" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. STRICT VERSION MISMATCH BLOCKING MODAL -->
+    <div id="versionMismatchModal" class="modal-overlay hidden">
+      <div class="modal-content version-block-modal">
+        <div class="version-block-icon">⚠️</div>
+        <div class="modal-title" style="text-align: center; color: #ed8796; font-size: 16px;">
+          Connection Blocked: Version Mismatch
+        </div>
+        <p id="versionMismatchModalDesc" style="font-size: 13px; color: #cad3f5; line-height: 1.5; text-align: center; margin: 12px 0 16px 0;">
+          You are on version <strong id="vmLocalVer">v1.0.1</strong>, but your partner is on version <strong id="vmRemoteVer">v1.0.0</strong>.<br /><br />
+          Connecting between different versions is blocked to prevent animation corruption and data desynchronization.
+        </p>
+        <p style="font-size: 11px; color: #eed49f; text-align: center; margin-bottom: 20px;">
+          💡 Please ensure both computers have updated to the latest version before connecting.
+        </p>
+        <div style="display: flex; justify-content: center;">
+          <button id="btnCloseVersionMismatchModal" class="btn-primary" style="padding: 8px 24px; font-size: 12px;">
+            Understood
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. FLOATING GLOBAL TOOLTIP -->
+    <div id="globalTooltip" class="global-tooltip hidden"></div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

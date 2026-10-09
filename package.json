@@ -1,0 +1,136 @@
+{
+  "name": "desktop-pet-studio",
+  "version": "1.0.3",
+  "description": "Two-player cooperative desktop pet with real-time Pixel Pet Studio animation editor, custom quotes, and P2P sync",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "vite --open",
+    "build": "node scripts/generate-icon.js && vite build",
+    "preview": "vite preview",
+    "prestart": "node scripts/generate-icon.js && vite build",
+    "start": "electron .",
+    "bump:patch": "node scripts/bump-version.js patch",
+    "bump:minor": "node scripts/bump-version.js minor",
+    "bump:major": "node scripts/bump-version.js major",
+    "unpack": "npm run build && npx electron-builder --win --dir",
+    "package": "npm run build && npx electron-builder --win",
+    "package:mac": "npm run build && npx electron-builder --mac",
+    "package:all": "npm run build && npx electron-builder --win --mac",
+    "release:patch": "node scripts/bump-version.js patch && npm run build && npx electron-builder --win",
+    "release:minor": "node scripts/bump-version.js minor && npm run build && npx electron-builder --win",
+    "release": "npm run release:patch"
+  },
+  "keywords": [
+    "desktop-pet",
+    "pixel-art",
+    "animation",
+    "p2p",
+    "electron",
+    "webrtc"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "electron-updater": "^6.8.9",
+    "peerjs": "^1.5.4"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^26.15.3",
+    "vite": "^6.0.7"
+  },
+  "build": {
+    "appId": "com.pixelpet.studio",
+    "productName": "Pixel Pet Studio",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "assets/**/*",
+      "tools/**/*"
+    ],
+    "asarUnpack": [
+      "tools/**/*"
+    ],
+    "win": {
+      "extraResources": [
+        {
+          "from": "tools/screen-picker.exe",
+          "to": "tools/screen-picker.exe"
+        }
+      ],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "Pixel-Pet-Studio-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "Pixel-Pet-Studio-Portable-${version}.${ext}"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.entertainment",
+      "artifactName": "Pixel-Pet-Studio-${version}-${arch}.${ext}",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "identity": null
+    },
+    "dmg": {
+      "title": "Pixel Pet Studio ${version}",
+      "artifactName": "Pixel-Pet-Studio-${version}-${arch}.${ext}",
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "FrostyNinx",
+        "repo": "Pet-Project"
+      }
+    ]
+  }
+}
